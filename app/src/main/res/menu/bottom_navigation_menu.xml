@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <group
+        android:enabled="true"
+        android:checkableBehavior="single">
+        <item
+            android:id="@+id/currentWeatherFragment"
+            android:icon="@drawable/ic_baseline_home_24"
+            android:title="Home"
+            />
+
+        <item
+            android:id="@+id/futureWeatherFragment"
+            android:icon="@drawable/ic_baseline_calendar_today_24"
+            android:title="Forecast" />
+
+        <item
+            android:id="@+id/settingFragment"
+            android:icon="@drawable/ic_baseline_settings_24"
+            android:title="Setting" />
+
+    </group>
+</menu>

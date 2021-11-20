@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/currentWeatherFragment">
+
+    <fragment
+        android:id="@+id/currentWeatherFragment"
+        android:name="com.example.weatherhut.ui.weather.current.CurrentWeatherFragment"
+        android:label="Location"
+        tools:layout="@layout/current_weather_fragment" />
+    <fragment
+        android:id="@+id/futureWeatherFragment"
+        android:name="com.example.weatherhut.ui.weather.future.list.FutureWeatherFragment"
+        android:label="Forecast"
+        tools:layout="@layout/list_future_weather_fragment" >
+        <action
+            android:id="@+id/action_futureWeatherFragment_to_detailWeatherFragment"
+            app:destination="@id/detailWeatherFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/settingFragment"
+        android:name="com.example.weatherhut.ui.setting.SettingFragment"
+        android:label="Setting" />
+    <fragment
+        android:id="@+id/detailWeatherFragment"
+        android:name="com.example.weatherhut.ui.weather.future.detail.DetailWeatherFragment"
+        android:label="Detail"
+        tools:layout="@layout/detail_future_weather_fragment" >
+        <argument
+            android:name="hourEntryIndex"
+            app:argType="integer" />
+    </fragment>
+</navigation>
