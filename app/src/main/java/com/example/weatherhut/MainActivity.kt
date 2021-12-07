@@ -27,6 +27,7 @@ import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupWithNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.weatherhut.data.provider.LocationSettingProvider
 import com.example.weatherhut.data.repository.WeatherHutRepositoryImpl
 import com.example.weatherhut.internal.LifecycleBoundLocationManager
 import com.example.weatherhut.ui.weather.future.list.FutureListItemAdapter
@@ -53,9 +54,10 @@ class MainActivity : AppCompatActivity(), KodeinAware {
     lateinit var drawer: DrawerLayout
     lateinit var appBarConfiguration: AppBarConfiguration
     override val kodein by closestKodein()
+    private val locationSettingProvider: LocationSettingProvider by instance()
     private val fusedLocationProvider: FusedLocationProviderClient by instance()
+
     val viewModel: FutureWeatherViewModel by viewModels()
-    lateinit var recyclerView: RecyclerView
 
     private val locationCallBack = object : LocationCallback() {
         override fun onLocationResult(p0: LocationResult) {
@@ -71,32 +73,29 @@ class MainActivity : AppCompatActivity(), KodeinAware {
         navController = this.findNavController(R.id.nav_host_fragment)
         toolbar = findViewById(R.id.toolbar)
         drawer = findViewById(R.id.drawer_layout)
-        //bottomNav = findViewById(R.id.bottom_nav)
-        
+        window.statusBarColor = Color.parseColor("#1A237E")
 
         //setting up toolbar
         setUpToolBar()
 
+        //linking toolbar, navigation drawer and navController together
         appBarConfiguration = AppBarConfiguration(navController.graph, drawer)
         toolbar.setupWithNavController(navController, appBarConfiguration)
         findViewById<NavigationView>(R.id.navigationView).setupWithNavController(navController)
 
-        //binding navController with toolbar & bottomNavigationBar
-        //bottomNav.setupWithNavController(navController)
-        //NavigationUI.setupWithNavController(toolbar, navController, drawer)
-
         //requesting location permission
-        //requestLocationPermission()
+        requestLocationPermission()
 
         //if(hasPermissionGranted()){
-        //   bindLocationManager()
+        // bindLocationManager()
         //} else requestLocationPermission()
     }
 
     private fun setUpToolBar() {
         setSupportActionBar(toolbar)
-        toolbar.setTitleTextColor(Color.BLACK)
-        toolbar.setSubtitleTextColor(Color.BLACK)
+        toolbar.setTitleTextColor(Color.WHITE)
+        toolbar.setSubtitleTextColor(Color.WHITE)
+        toolbar.setBackgroundColor(Color.parseColor("#303F9F"))
         actionBar?.setDisplayHomeAsUpEnabled(true)
         actionBar?.setDisplayShowHomeEnabled(true)
     }
@@ -121,17 +120,18 @@ class MainActivity : AppCompatActivity(), KodeinAware {
         )
     }
 
-    /*override fun onRequestPermissionsResult(
+    override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<out String>,
         grantResults: IntArray
     ) {
         if (requestCode == MY_PERMISSION_ACCESS_COARSE_LOCATION) {
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                bindLocationManager()
+                locationSettingProvider.setLocationOn()
+            //bindLocationManager()
             } else Toast.makeText(this, "Set the location in the setting, manually.", Toast.LENGTH_SHORT).show()
         } else return super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-    }*/
+    }
 
     override fun onSupportNavigateUp(): Boolean {
 

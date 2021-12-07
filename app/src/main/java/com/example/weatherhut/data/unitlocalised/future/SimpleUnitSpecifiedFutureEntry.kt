@@ -74,7 +74,7 @@ data class SimpleUnitSpecifiedFutureEntry (
     @ColumnInfo(name = "windCdirFull")
     val windCdirFull: String,
     @ColumnInfo(name = "windDir")
-    val windDir: Int,
+    val windDir: String,
     @ColumnInfo(name = "windGustSpd")
     val windGustSpd: Double,
     @ColumnInfo(name = "windSpd")

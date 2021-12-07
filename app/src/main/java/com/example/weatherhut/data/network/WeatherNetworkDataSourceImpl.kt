@@ -1,10 +1,12 @@
 package com.example.weatherhut.data.network
 
 import android.util.Log
+import android.widget.Toast
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.example.weatherhut.data.apiservice.ApixuWeatherApiService
 import com.example.weatherhut.data.apiservice.WeatherBitApiService
+import com.example.weatherhut.data.provider.UNIT_SYSTEM
 import com.example.weatherhut.data.response.openweather.forecast.daily.ForecastWeatherResponseNEW
 import com.example.weatherhut.data.response.openweather.forecast.hourly.HourlyForecastResponse
 import com.example.weatherhut.data.response.weatherapi.CurrentWeatherResponseFromWA
@@ -78,8 +80,10 @@ class WeatherNetworkDataSourceImpl(
 
     override suspend fun getForecastDayWeather(latitude: Double, longitude: Double) {
         try {
+
             val forecastWeather = weatherBitApiService.getForecastDayWeather(latitude, longitude).await()
             _downloadedForecastData.postValue(forecastWeather)
+            System.out.println("{{{{{{{{{{{{{}{{{{{{{{{{{}}}}}}}}}}}}chla he ye")
         } catch (e: NoConnectivityException){
             Log.e("No Internet", "Check you internet connection", e)
         }
@@ -93,6 +97,7 @@ class WeatherNetworkDataSourceImpl(
         try {
             val forecastHourWeather = weatherBitApiService.getForecastHourWeather(location).await()
             _downloadedForecastHourData.postValue(forecastHourWeather)
+            System.out.println("{{{{{{{{{{{{{}{{{{{{{{{{{}}}}}}}}}}}}chla he ye")
         } catch(e: NoConnectivityException){
             Log.e("No Internet", "Check your internet connection", e)
         }

@@ -1,28 +1,24 @@
 package com.example.weatherhut.ui.weather.current
 
 import android.content.Context
-import android.icu.text.SimpleDateFormat
-import android.os.Build
-import android.text.format.DateFormat
-import android.text.format.Formatter
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.annotation.RequiresApi
+import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.weatherhut.R
 import com.example.weatherhut.data.db.weatherbit.ForecastHourEntries
-import org.threeten.bp.LocalDate
+import com.example.weatherhut.data.provider.UnitProvider
+import com.example.weatherhut.data.provider.UnitProviderImpl
 import org.threeten.bp.LocalDateTime
 import org.threeten.bp.format.DateTimeFormatter
-import org.threeten.bp.format.FormatStyle
-import java.text.DateFormatSymbols
 
 class HourEntriesAdapter(private val context: Context): RecyclerView.Adapter<HourEntriesAdapter.HourEntryViewHolder>() {
     var list = ArrayList<ForecastHourEntries>()
+    val unitProvider: UnitProvider = UnitProviderImpl(context)
     var index: Int? = null
 
     class HourEntryViewHolder(view: View): RecyclerView.ViewHolder(view){
@@ -37,13 +33,14 @@ class HourEntriesAdapter(private val context: Context): RecyclerView.Adapter<Hou
         return HourEntryViewHolder(view)
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
     override fun onBindViewHolder(holder: HourEntryViewHolder, position: Int) {
-
         val text = list[position].timestampLocal
-        holder.time.text = "${LocalDateTime.parse(text).format(
-            DateTimeFormatter.ofPattern("h:mm a"))}"
-        holder.temperature.text = list[position].temp.toString()
+        holder.time.text = "${LocalDateTime.parse(text).format(DateTimeFormatter.ofPattern("h:mm a"))}"
+        if(unitProvider.getUnitSystem().name == "METRIC"){
+            holder.temperature.text = "${list[position].temp}°C"
+        } else{
+            holder.temperature.text = "${Math.round((list[position].temp*9/5 + 32) * 10.0) / 10.0} °F"
+        }
         holder.day.text = LocalDateTime.parse(text).dayOfWeek.name
         Glide.with(context).load("https://www.weatherbit.io/static/img/icons/${list[position].weather.icon}.png").into(holder.icon)
     }
@@ -57,7 +54,7 @@ class HourEntriesAdapter(private val context: Context): RecyclerView.Adapter<Hou
     }
 
     fun setList(list: List<ForecastHourEntries>){
-        this.list = ArrayList(list)
+        this.list = ArrayList(list.subList(1, list.size))
         notifyDataSetChanged()
     }
 }

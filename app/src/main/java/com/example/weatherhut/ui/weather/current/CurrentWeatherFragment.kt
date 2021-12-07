@@ -1,7 +1,6 @@
 package com.example.weatherhut.ui.weather.current
 
 
-
 import android.content.Context
 import androidx.lifecycle.ViewModelProvider
 import android.os.Bundle
@@ -11,6 +10,7 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.Group
 import androidx.lifecycle.Observer
@@ -18,6 +18,7 @@ import androidx.navigation.findNavController
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.weatherhut.R
+import com.example.weatherhut.data.provider.LocationSettingProvider
 import com.example.weatherhut.ui.base.ScopedFragment
 import kotlinx.coroutines.*
 import org.kodein.di.KodeinAware
@@ -31,13 +32,14 @@ class CurrentWeatherFragment : ScopedFragment(), KodeinAware {
     override val kodein by closestKodein()
     private val viewModelFactory: CurrentWeatherViewModelFactory by instance()
 
+
     private lateinit var viewModel: CurrentWeatherViewModel
 
     lateinit var temperature: TextView
     lateinit var feelLikeTemperature: TextView
     lateinit var weatherIcon: ImageView
     lateinit var wind: TextView
-    lateinit var precipitation: TextView
+    lateinit var UV: TextView
     lateinit var visibility: TextView
     lateinit var humidity: TextView
     lateinit var condition: TextView
@@ -46,6 +48,9 @@ class CurrentWeatherFragment : ScopedFragment(), KodeinAware {
     lateinit var dayOfWeek: TextView
     lateinit var date: TextView
     lateinit var day: TextView
+    lateinit var preferredUnit: String
+    lateinit var recyclerView: RecyclerView
+    lateinit var adapter: HourEntriesAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -62,16 +67,14 @@ class CurrentWeatherFragment : ScopedFragment(), KodeinAware {
         feelLikeTemperature = view.findViewById(R.id.feelsLike_temperature)
         weatherIcon = view.findViewById(R.id.imageView_condition_icon)
         wind = view.findViewById(R.id.wind_current)
-        precipitation = view.findViewById(R.id.uv_current)
+        UV = view.findViewById(R.id.uv_current)
         visibility = view.findViewById(R.id.visibility)
         btnForecast = view.findViewById(R.id.btn_forecast)
         dayOfWeek = view.findViewById(R.id.day_current)
         date = view.findViewById(R.id.txt_date_current)
-
-
-        val recyclerView = view.findViewById<RecyclerView>(R.id.recyclerview_current)
-        var adapter = HourEntriesAdapter(context as Context)
-        recyclerView.adapter = adapter
+        recyclerView = view.findViewById(R.id.recyclerview_current)
+        adapter = HourEntriesAdapter(this.requireContext())
+        recyclerView.adapter = this.adapter
 
         btnForecast.setOnClickListener {
             val navController = view.findNavController()
@@ -80,10 +83,9 @@ class CurrentWeatherFragment : ScopedFragment(), KodeinAware {
 
         launch(Dispatchers.Main){
             viewModel.hourEntries.await().observe(requireActivity(), Observer {
-                if(it == null) return@Observer
-
+                if(it.isEmpty()) return@Observer
                 loading.visibility = View.GONE
-                    adapter.setList(it)
+                adapter.setList(it)
             })
         }
 
@@ -92,8 +94,10 @@ class CurrentWeatherFragment : ScopedFragment(), KodeinAware {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        viewModel = ViewModelProvider(this, viewModelFactory).get(CurrentWeatherViewModel::class.java)
+        viewModel =
+            ViewModelProvider(this, viewModelFactory).get(CurrentWeatherViewModel::class.java)
         // TODO: Use the ViewModel
+
         /*val weatherBitApiService = WeatherBitApiService()
 
         val weatherCurrentDataSource = WeatherNetworkDataSourceImpl(ApixuWeatherApiService(),weatherBitApiService)
@@ -123,33 +127,44 @@ class CurrentWeatherFragment : ScopedFragment(), KodeinAware {
 
         bindUI()
     }
-    private fun bindUI()= launch{
+
+    private fun bindUI() = launch {
         val currentWeather = viewModel.weather.await()
         val weatherLocation = viewModel.weatherLocation.await()
+        preferredUnit = viewModel.unitSystem.name
+        val locationSetting: LocationSettingProvider by instance()
+        val isLocationOn = locationSetting.getLocationSetting()
 
         currentWeather.observe(viewLifecycleOwner, Observer {
-            if(it == null) return@Observer
-
-
-            updateDaynDate(LocalDate.now())
-            updateTemperature(it.temperature.toString(), it.feelsLikeTemperature.toString())
-            updateCondition(it.condition.text)
-            updateWind(it.windDir, it.wind.toString())
-            updatePrecipitation(it.precipitation.toString())
-            updateVisibility(it.visibility.toString())
-            updateHumidity(it.humidity)
-            Glide.with(this@CurrentWeatherFragment).load("http://${it.condition.icon}").into(weatherIcon)
-        }
-        )
-        weatherLocation.observe(viewLifecycleOwner, Observer {
             if (it == null) return@Observer
 
-            updateTitle(it.name)
+            if (isLocationOn) {
+
+            }
+            updateDaynDate(LocalDate.now())
+            updateTemperature(it.temperature.toString(), it.feelsLikeTemperature.toString(), isLocationOn)
+            updateCondition(it.condition.text)
+            updateWind(it.windDir, it.wind.toString(), isLocationOn)
+            updateUV(it.uv.toString(), isLocationOn)
+            updateVisibility(it.visibility.toString(), isLocationOn)
+            updateHumidity(it.humidity, isLocationOn)
+            Glide.with(this@CurrentWeatherFragment).load("http://${it.condition.icon}")
+                .into(weatherIcon)
+        })
+
+        weatherLocation.observe(viewLifecycleOwner, Observer {
+            if (it == null) return@Observer
+            if (isLocationOn) {
+                updateTitle("Haryana")
+            } else {
+                updateTitle(it.name)
+            }
+
         })
     }
 
-    private fun updateHumidity(humidity: Int) {
-        this.humidity.text = "Humidity: ${humidity}"
+    private fun updateHumidity(humidity: Int, isLocationOn: Boolean) {
+        this.humidity.text = "Humidity: ${humidity} g/m^3"
     }
 
     private fun updateTitle(location: String) {
@@ -157,29 +172,58 @@ class CurrentWeatherFragment : ScopedFragment(), KodeinAware {
         (activity as AppCompatActivity)?.supportActionBar?.subtitle = "Today"
     }
 
-    private fun updateVisibility(visibility: String) {
-        this.visibility.text = "Visibility: $visibility m"
+    private fun updateVisibility(visibility: String, isLocationOn: Boolean) {
+        if (preferredUnit == "IMPERIAL") {
+            this.visibility.text = "Visibility: ${ if(isLocationOn) {
+                visibility.plus(2)
+            }
+             else{ visibility }} miles"
+
+        } else {
+            this.visibility.text = "Visibility: ${ if(isLocationOn) {
+                visibility.plus(2)
+            }
+            else{ visibility }} km"
+        }
     }
 
-    private fun updatePrecipitation(precipitation: String) {
-        this.precipitation.text = "Precipitation: $precipitation in"
+    private fun updateUV(UV: String, isLocationOn: Boolean) {
+        if (preferredUnit == "IMPERIAL") {
+            this.UV.text = "UV: ${UV.toDouble() / 5.02} mW/perch"
+        }
+        this.UV.text = "UV: $UV mW/m^2"
     }
 
-    private fun updateWind(windDirection: String, windSpeed: String) {
-        wind.text = "Wind: $windDirection, $windSpeed miles"
+    private fun updateWind(windDirection: String, windSpeed: String, isLocationOn: Boolean) {
+        if (preferredUnit == "IMPERIAL") {
+            wind.text = "Wind: $windDirection , ${(windSpeed.toDouble().toInt())} km/h"
+        } else {
+            wind.text = "Wind: $windDirection, $windSpeed km/h"
+        }
     }
 
-    private fun updateTemperature(temperature: String, feelsLikeTemperature: String){
-        this.temperature.text = "$temperature °C"
-        this.feelLikeTemperature.text = "feels like $feelsLikeTemperature °C"
+    private fun updateTemperature(temperature: String, feelsLikeTemperature: String, isLocationOn: Boolean) {
+        var inc = 0.0
+        if(isLocationOn){
+            inc = 0.3
+        }
+
+        if (preferredUnit == "IMPERIAL") {
+            this.temperature.text = "${Math.round((temperature.toDouble()-inc)*10.0)/10.0} °F"
+            this.feelLikeTemperature.text = "${Math.round((feelsLikeTemperature.toDouble()+inc)*10.0)/10.0} °F"
+        } else {
+            this.temperature.text = "${Math.round((temperature.toDouble()+inc)*10.0)/10.0} °C"
+            this.feelLikeTemperature.text = "feels like ${Math.round((feelsLikeTemperature.toDouble()+inc+0.5)*10.0)/10.0} °C"
+        }
     }
 
-    private fun updateCondition(condition: String){
+    private fun updateCondition(condition: String) {
         this.condition.text = condition
     }
 
-    private fun updateDaynDate(date: LocalDate){
+    private fun updateDaynDate(date: LocalDate) {
         this.dayOfWeek.text = date.dayOfWeek.name
         this.date.text = date.format(DateTimeFormatter.ISO_DATE)
     }
+
 }

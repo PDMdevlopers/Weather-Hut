@@ -12,6 +12,7 @@ import com.example.weatherhut.data.db.weatherbit.ForecastDay
 import com.example.weatherhut.data.db.weatherbit.ForecastDayDao
 import com.example.weatherhut.data.db.weatherbit.ForecastHourEntries
 import com.example.weatherhut.data.db.weatherbit.FutureHourDao
+import com.example.weatherhut.data.provider.LocationSettingProvider
 import com.example.weatherhut.data.response.weatherapi.CurrentWeatherResponseFromWA
 import com.example.weatherhut.data.unitlocalised.future.SimpleUnitSpecifiedFutureEntry
 import kotlinx.coroutines.*
@@ -29,19 +30,21 @@ class WeatherHutRepositoryImpl(
     private val forecastDayDao: ForecastDayDao,
     private val weatherLocationWADao: WeatherLocationWADao,
     private val hourDao: FutureHourDao,
-    private val locationProvider: LocationProvider
+    private val locationProvider: LocationProvider,
+    private val locationSettingProvider: LocationSettingProvider
 ) : WeatherHutRepository {
 
 
     init {
         weatherNetworkDataSource.apply {
-            downloadedCurrentData.observeForever { newCurrentWeatherResponse->
+
+            downloadedCurrentData.observeForever { newCurrentWeatherResponse ->
                 persistFetchedCurrentWeather(newCurrentWeatherResponse)
             }
-            downloadedForecastDayData.observeForever { newFutureWeatherResponse->
+            downloadedForecastDayData.observeForever { newFutureWeatherResponse ->
                 persistFetchedFutureWeather(newFutureWeatherResponse.ForecastWeatherEntries)
             }
-            downloadedForecastHourData.observeForever { newHourlyWeatherRsponse->
+            downloadedForecastHourData.observeForever { newHourlyWeatherRsponse ->
                 persistFetchedHourWeatherEntry(newHourlyWeatherRsponse.forecastHourEntries)
             }
         }
@@ -49,26 +52,26 @@ class WeatherHutRepositoryImpl(
 
     override suspend fun getFetchedCurrentWeather(metric: Boolean): LiveData<out UnitSpecifiedCurrentWeatherWA> {
 
-        return withContext(Dispatchers.IO){
+        return withContext(Dispatchers.IO) {
             initWeather()
             //there is no metric system. unitSpecified is used by only one class so return that on both conditions?
             // TODO create a unitSpecified classes if api allow us
-            return@withContext if(metric) currentWeatherWADao.getMetricCurrentWeather()
-                else currentWeatherWADao.getImperialCurrentWeather()
+            return@withContext if (metric) currentWeatherWADao.getMetricCurrentWeather()
+            else currentWeatherWADao.getImperialCurrentWeather()
 
         }
     }
 
 
     override suspend fun getFetchedFutureWeather(startDate: LocalDate): LiveData<List<SimpleUnitSpecifiedFutureEntry>> {
-        return withContext(Dispatchers.IO){
+        return withContext(Dispatchers.IO) {
             initWeather()
             return@withContext forecastDayDao.getFutureWeather(startDate)
         }
     }
 
     override suspend fun getWeatherLocation(): LiveData<com.example.weatherhut.data.db.weatherapi.WeatherLocation> {
-        return withContext(Dispatchers.IO){
+        return withContext(Dispatchers.IO) {
             initWeather()
             return@withContext weatherLocationWADao.getLocation()
         }
@@ -82,7 +85,9 @@ class WeatherHutRepositoryImpl(
     }
 
     private fun persistFetchedCurrentWeather(fetchedWeather: CurrentWeatherResponseFromWA) {
-        GlobalScope.launch(Dispatchers.IO){
+        System.out.println("current upsert in repo, persist me error nhi aya")
+        GlobalScope.launch(Dispatchers.IO) {
+
             currentWeatherWADao.upsert(fetchedWeather.current)
             weatherLocationWADao.upset(fetchedWeather.location)
         }
@@ -90,11 +95,11 @@ class WeatherHutRepositoryImpl(
 
     private fun persistFetchedFutureWeather(fetchedFutureWeather: List<ForecastDay>) {
 
-        fun deleteOldFetchedData(){
+        fun deleteOldFetchedData() {
             val today = LocalDate.now()
             forecastDayDao.deleteOldWeatherEntries(today)
         }
-        GlobalScope.launch(Dispatchers.IO){
+        GlobalScope.launch(Dispatchers.IO) {
             deleteOldFetchedData()
             forecastDayDao.upsert(fetchedFutureWeather)
             val location = weatherLocationWADao.getLocationNonLive()
@@ -103,11 +108,11 @@ class WeatherHutRepositoryImpl(
     }
 
     private fun persistFetchedHourWeatherEntry(newHourEntries: List<ForecastHourEntries>) {
-        fun deleteOldEntries(currentDateTime: LocalDateTime){
+        fun deleteOldEntries(currentDateTime: LocalDateTime) {
             hourDao.deleteOldHourlyWeatherEntries()
         }
-
-        GlobalScope.launch(Dispatchers.IO){
+        System.out.println("hour upser in repo, persist me error nhi aya")
+        GlobalScope.launch(Dispatchers.IO) {
             deleteOldEntries(LocalDateTime.now())
             hourDao.upsert(newHourEntries)
             val location = weatherLocationWADao.getLocationNonLive()
@@ -115,10 +120,10 @@ class WeatherHutRepositoryImpl(
         }
     }
 
-    private suspend fun initWeather(){
+    private suspend fun initWeather() {
         val lastWeatherLocation = weatherLocationWADao.getLocationNonLive()
 
-        if(lastWeatherLocation == null || locationProvider.hasLocationChanged(lastWeatherLocation)) {
+        if (lastWeatherLocation == null || locationProvider.hasLocationChanged(lastWeatherLocation)) {
             fetchCurrentWeather()
             fetchFutureWeather()
             fetchHourlyWeather()
@@ -128,35 +133,50 @@ class WeatherHutRepositoryImpl(
         if (isFetchCurrentWeatherNeeded(lastWeatherLocation.zoneDateTime))
             fetchCurrentWeather()
 
-        if(isFetchFutureWeatherNeeded())
+        if (isFetchFutureWeatherNeeded())
             fetchFutureWeather()
 
-        if((isFetchHourlyWeatherNeeded())){
+        if ((isFetchHourlyWeatherNeeded())) {
             fetchHourlyWeather()
-            }
+        }
     }
 
 
-    private suspend fun fetchCurrentWeather(){
-
-        weatherNetworkDataSource.fetchCurrentWeatherData(
-            locationProvider.getPreferredLocation()
-        )
+    private suspend fun fetchCurrentWeather() {
+        if (locationSettingProvider.getLocationSetting()) (
+                weatherNetworkDataSource.fetchCurrentWeatherData(
+                    "Haryana"
+                )
+                ) else {
+            weatherNetworkDataSource.fetchCurrentWeatherData(
+                locationProvider.getPreferredLocation()
+            )
+        }
     }
 
-    private suspend fun fetchFutureWeather(){
-        weatherNetworkDataSource.getForecastDayWeather(
-            locationProvider.getPreferredLocation()
-        )
+    private suspend fun fetchFutureWeather() {
+        if (locationSettingProvider.getLocationSetting()) {
+            weatherNetworkDataSource.getForecastDayWeather(
+                "Haryana"
+            )
+        } else {
+            weatherNetworkDataSource.getForecastDayWeather(
+                locationProvider.getPreferredLocation()
+            )
+        }
     }
 
-    private suspend fun fetchHourlyWeather(){
-        weatherNetworkDataSource
-            .getForecastHourWeather(locationProvider.getPreferredLocation())
+    private suspend fun fetchHourlyWeather() {
+        if (locationSettingProvider.getLocationSetting()){
+            weatherNetworkDataSource.getForecastHourWeather("Haryana")
+        } else {
+            weatherNetworkDataSource
+                .getForecastHourWeather(locationProvider.getPreferredLocation())
+        }
     }
 
 
-    private fun isFetchCurrentWeatherNeeded(lastFetchedTime: ZonedDateTime): Boolean{
+    private fun isFetchCurrentWeatherNeeded(lastFetchedTime: ZonedDateTime): Boolean {
         val thirtyMinutesAgo = ZonedDateTime.now().minusMinutes(30)
         return lastFetchedTime.isBefore(thirtyMinutesAgo)
     }

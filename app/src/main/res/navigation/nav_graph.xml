@@ -32,4 +32,9 @@
             android:name="hourEntryIndex"
             app:argType="integer" />
     </fragment>
+    <fragment
+        android:id="@+id/mapsFragment"
+        android:name="com.example.weatherhut.ui.weather.map.MapsFragment"
+        android:label="Map"
+        tools:layout="@layout/fragment_maps" />
 </navigation>

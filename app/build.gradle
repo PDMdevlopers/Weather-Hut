@@ -1,6 +1,7 @@
 plugins {
     id 'com.android.application'
     id 'kotlin-android'
+    id 'com.google.android.libraries.mapsplatform.secrets-gradle-plugin'
 }
 
 apply plugin: 'kotlin-android'
@@ -74,8 +75,8 @@ dependencies {
     //implementation("androidx.room:room-compiler:$roomVersion")
 
     //Groupie
-    implementation "com.xwray:groupie:2.1.0"
-    implementation "com.xwray:groupie-kotlin-android-extensions:2.1.0"
+    //implementation "com.xwray:groupie:2.1.0"
+    //implementation "com.xwray:groupie-kotlin-android-extensions:2.1.0"
 
     //Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.3.9")

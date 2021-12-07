@@ -4,10 +4,16 @@
     <option name="filePathToZoomLevelMap">
       <map>
         <entry key="..\:/Users/faiza/AndroidStudioProjects/WeatherHut/app/src/main/res/layout/activity_main.xml" value="0.16944444444444445" />
-        <entry key="..\:/Users/faiza/AndroidStudioProjects/WeatherHut/app/src/main/res/layout/current_weather_fragment.xml" value="0.17407407407407408" />
+        <entry key="..\:/Users/faiza/AndroidStudioProjects/WeatherHut/app/src/main/res/layout/activity_splash_screen.xml" value="0.22" />
+        <entry key="..\:/Users/faiza/AndroidStudioProjects/WeatherHut/app/src/main/res/layout/current_weather_fragment.xml" value="0.2" />
         <entry key="..\:/Users/faiza/AndroidStudioProjects/WeatherHut/app/src/main/res/layout/detail_future_weather_fragment.xml" value="0.25" />
         <entry key="..\:/Users/faiza/AndroidStudioProjects/WeatherHut/app/src/main/res/layout/drawer_header.xml" value="0.20416666666666666" />
-        <entry key="..\:/Users/faiza/AndroidStudioProjects/WeatherHut/app/src/main/res/xml/preferences.xml" value="0.16944444444444445" />
+        <entry key="..\:/Users/faiza/AndroidStudioProjects/WeatherHut/app/src/main/res/layout/fragment_maps.xml" value="0.1" />
+        <entry key="..\:/Users/faiza/AndroidStudioProjects/WeatherHut/app/src/main/res/layout/item_future_weather.xml" value="0.20416666666666666" />
+        <entry key="..\:/Users/faiza/AndroidStudioProjects/WeatherHut/app/src/main/res/layout/item_hour_weather.xml" value="0.20416666666666666" />
+        <entry key="..\:/Users/faiza/AndroidStudioProjects/WeatherHut/app/src/main/res/layout/list_future_weather_fragment.xml" value="0.20416666666666666" />
+        <entry key="..\:/Users/faiza/AndroidStudioProjects/WeatherHut/app/src/main/res/menu/bottom_navigation_menu.xml" value="0.1" />
+        <entry key="..\:/Users/faiza/AndroidStudioProjects/WeatherHut/app/src/main/res/xml/preferences.xml" value="0.33" />
       </map>
     </option>
   </component>

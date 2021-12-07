@@ -9,10 +9,7 @@ import com.example.weatherhut.data.apiservice.ApixuWeatherApiService
 import com.example.weatherhut.data.apiservice.WeatherBitApiService
 import com.example.weatherhut.data.db.WeatherHutDatabase
 import com.example.weatherhut.data.network.*
-import com.example.weatherhut.data.provider.LocationProvider
-import com.example.weatherhut.data.provider.LocationProviderImpl
-import com.example.weatherhut.data.provider.UnitProvider
-import com.example.weatherhut.data.provider.UnitProviderImpl
+import com.example.weatherhut.data.provider.*
 import com.example.weatherhut.data.repository.WeatherHutRepository
 import com.example.weatherhut.data.repository.WeatherHutRepositoryImpl
 import com.example.weatherhut.ui.weather.current.CurrentWeatherViewModelFactory
@@ -41,13 +38,14 @@ class WeatherHutApplication: Application(), KodeinAware {
         bind() from singleton { ApixuWeatherApiService(instance()) }
         bind() from singleton { WeatherBitApiService(instance())}
         bind() from provider{LocationServices.getFusedLocationProviderClient(instance<Context>())}
+        bind<LocationSettingProvider>() with singleton { LocationSettingProviderImpl(instance()) }
         bind<WeatherNetworkDataSourceImpl>() with singleton { WeatherNetworkDataSourceImpl(instance(), instance()) }
-        bind<WeatherHutRepository>() with singleton { WeatherHutRepositoryImpl(instance(), instance(), instance(), instance(), instance(), instance()) }
+        bind<WeatherHutRepository>() with singleton { WeatherHutRepositoryImpl(instance(), instance(), instance(), instance(), instance(), instance(), instance()) }
         bind<UnitProvider>() with singleton {UnitProviderImpl(instance())}
         bind<LocationProvider>() with singleton {LocationProviderImpl(instance(), instance())}
-        bind() from provider { CurrentWeatherViewModelFactory(instance(), instance()) }
+        bind() from provider { CurrentWeatherViewModelFactory(instance(), instance(), instance()) }
         bind() from provider { FutureWeatherViewModelFactory(instance())}
-        bind() from provider { DetailedWeatherVIewModelFactory(instance())}
+        bind() from provider { DetailedWeatherVIewModelFactory(instance(), instance())}
         }
 
     override fun onCreate() {

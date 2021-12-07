@@ -9,7 +9,7 @@
         android:key="USE_DEVICE_LOCATION"
         android:title=" Use Device Location"
         android:summary="Allow the app to use your location"
-        android:defaultValue="true"
+        android:defaultValue="false"
         android:disableDependentsState="true"
         />
 
@@ -17,7 +17,7 @@
         android:key="CUSTOM_LOCATION"
         android:title="Location"
         android:summary="The location for which the weather will be displayed"
-        android:defaultValue="Delhi"
+        android:defaultValue="Haryana"
         android:dependency="USE_DEVICE_LOCATION"/>
 
 

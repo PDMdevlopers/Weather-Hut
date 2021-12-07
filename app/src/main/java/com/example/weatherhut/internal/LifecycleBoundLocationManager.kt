@@ -1,6 +1,7 @@
 package com.example.weatherhut.internal
 
 import android.annotation.SuppressLint
+import android.os.Looper
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.LifecycleOwner
@@ -24,10 +25,11 @@ class LifecycleBoundLocationManager(
         priority = com.google.android.gms.location.LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY
     }
 
-    @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
+
     @SuppressLint("MissingPermission")
+    @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
     fun startLocationUpdate(){
-        fusedLocationProviderClient.requestLocationUpdates(locationRequest, locationCallback, null)
+        fusedLocationProviderClient.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper())
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)

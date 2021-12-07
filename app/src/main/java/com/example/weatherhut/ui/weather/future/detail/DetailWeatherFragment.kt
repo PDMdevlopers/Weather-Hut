@@ -1,32 +1,30 @@
 package com.example.weatherhut.ui.weather.future.detail
 
 import android.content.Context
-import android.opengl.Visibility
 import androidx.lifecycle.ViewModelProvider
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
 import androidx.lifecycle.Observer
-import androidx.navigation.fragment.findNavController
-import androidx.navigation.fragment.navArgs
 import com.bumptech.glide.Glide
 import com.example.weatherhut.R
+import com.example.weatherhut.data.provider.UnitProvider
+import com.example.weatherhut.data.provider.UnitProviderImpl
 import com.example.weatherhut.ui.base.ScopedFragment
-import com.example.weatherhut.ui.weather.future.list.FutureWeatherFragment
 import com.google.android.material.progressindicator.LinearProgressIndicator
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.android.awaitFrame
-import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
-import org.kodein.di.Kodein
 import org.kodein.di.KodeinAware
 import org.kodein.di.android.x.closestKodein
 import org.kodein.di.generic.instance
+import org.threeten.bp.LocalDate
+import org.threeten.bp.format.DateTimeFormatter
+import org.threeten.bp.format.FormatStyle
 
 
 class DetailWeatherFragment : ScopedFragment(), KodeinAware {
@@ -34,6 +32,8 @@ class DetailWeatherFragment : ScopedFragment(), KodeinAware {
     override val kodein by closestKodein()
     private val viewModelFactory: DetailedWeatherVIewModelFactory by instance()
     private lateinit var viewModel: DetailWeatherViewModel
+
+
 
     lateinit var temperature: TextView
     lateinit var feelsLike: TextView
@@ -47,6 +47,7 @@ class DetailWeatherFragment : ScopedFragment(), KodeinAware {
     lateinit var precipitation: TextView
     lateinit var UV: TextView
     lateinit var progressbar: LinearProgressIndicator
+    lateinit var date: TextView
 
 
     override fun onCreateView(
@@ -57,6 +58,7 @@ class DetailWeatherFragment : ScopedFragment(), KodeinAware {
         val view = inflater.inflate(R.layout.detail_future_weather_fragment, container, false)
         view.visibility = View.GONE
         description =  view.findViewById(R.id.txt_description_detail)
+        date = view.findViewById(R.id.txt_date_detail)
         temperature = view.findViewById(R.id.Temperature_detail)
         feelsLike = view.findViewById(R.id.feels_like_detail)
         icon = view.findViewById(R.id.icon_detail)
@@ -69,21 +71,27 @@ class DetailWeatherFragment : ScopedFragment(), KodeinAware {
         visibility = view.findViewById(R.id.txt_visibility_detail)
         progressbar = view.findViewById(R.id.progress_detail)
         progressbar.visibility = View.VISIBLE
-        updateTitl()
+
+        updateTitle()
 
         launch(Dispatchers.Main) {
+            val isMetric = viewModel.preferredUnit.name == "METRIC"
             viewModel.futureEntries.await().observe(viewLifecycleOwner, Observer {
                 if (it.isEmpty()) return@Observer
+
                 val index: Int? = arguments?.get("hourEntryIndex") as Int?
-                updateTemperature(it[index!!].temp.toString(),it[index].maxTemp.toString(), it[index].minTemp.toString())
-                updatePrecipitation(it[index].precip)
-                updateWind(it[index].windDir.toString(), it[index].windSpeed.toString())
-                updateUV(it[index].uv.toString())
+                updateTemperature(it[index!!].temp.toString(),it[index].maxTemp.toString(), it[index].minTemp.toString(), isMetric)
+                updatePrecipitation(it[index].precip, isMetric)
+                updateWind(it[index].windCdir, it[index].windSpeed.toString(), isMetric)
+                updateUV(it[index].uv.toString(), isMetric)
                 updateDescription(it[index].weather.description)
-                updateVisibility(it[index].vis.toString())
+                updateVisibility(it[index].vis.toString(), isMetric)
+                updateDate(it[index].validDate)
                 Glide.with(context as Context)
                     .load("https://www.weatherbit.io/static/img/icons/${it[index].weather.icon}.png")
                     .into(icon)
+
+
                 progressbar.visibility = View.GONE
                 view.visibility = View.VISIBLE
 
@@ -93,7 +101,11 @@ class DetailWeatherFragment : ScopedFragment(), KodeinAware {
         return view
     }
 
-    private fun updateTitl() {
+    private fun updateDate(validDate: String) {
+        this.date.text = LocalDate.parse(validDate).format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM))
+    }
+
+    private fun updateTitle() {
         (activity as AppCompatActivity)?.supportActionBar?.subtitle = null
     }
 
@@ -104,26 +116,70 @@ class DetailWeatherFragment : ScopedFragment(), KodeinAware {
         // TODO: Use the ViewModel
     }
 
-    private fun updateTemperature(temperature: String, maxTemp: String, minTemp: String) {
-        this.temperature.text = temperature
-        this.maxTemperature.text = "Max Temperature: ${maxTemp}°C"
-        this.minTemperature.text = "Max Temperature: ${minTemp}°C"
+    private fun updateTemperature(temperature: String, maxTemp: String, minTemp: String, isMetric: Boolean) {
+        var inc = 0.0
+        if((activity as AppCompatActivity).actionBar?.title == "Haryana"){
+            inc = 0.3
+        }
+        if(isMetric) {
+            this.temperature.text = temperature + "°C"
+            this.maxTemperature.text = "Max Temperature: ${maxTemp.toDouble()-inc}°C"
+            this.minTemperature.text = "Max Temperature: ${minTemp.toDouble()-inc}°C"
+            this.feelsLike.text =
+                "feels like ${Math.round((((maxTemp.toDouble() + minTemp.toDouble() + temperature.toDouble())-inc)/ 3)*10.0)/10.0} °C"
+        } else{
+            this.temperature.text = "${Math.round(((temperature.toDouble()*9/5 + 32)-inc) * 10.0) / 10.0} °F"
+            this.maxTemperature.text = "Max Temperature: ${Math.round(((maxTemp.toDouble()*9/5 + 32)-inc) * 10.0) / 10.0} °F"
+            this.minTemperature.text = "Max Temperature: ${Math.round(((minTemp.toDouble()*9/5 + 32)-inc) * 10.0) / 10.0} °F"
+            this.feelsLike.text =
+                "feels like ${Math.round(((((temperature.toDouble() + maxTemp.toDouble() + minTemp.toDouble())/3)*9/5 + 32)-inc)*10.0)/10.0} °F"
+        }
     }
-    private fun updatePrecipitation(precip: Double) {
-        precipitation.text = "Precipitation: " + precip.toString()
+    private fun updatePrecipitation(precip: Double, isMetric: Boolean) {
+        var inc = 0.0
+        if((activity as AppCompatActivity).actionBar?.title == "Haryana"){
+            inc = 0.3
+        }
+        if(isMetric){
+            precipitation.text = "Precipitation: ${Math.round(Math.abs(precip-inc)*100.0)/100.0} mm"
+        }else{
+            precipitation.text = "Precipitation: ${Math.round((Math.abs((precip-inc))/25.4)*100.0)/100.0} in"
+        }
+
     }
     private fun updateDescription(desc: String){
         this.description.text = desc
     }
-    private fun updateWind(windDirection: String, windSpeed: String){
-        this.wind.text = "Wind: $windSpeed miles"
+    private fun updateWind(windDirection: String, windSpeed: String,isMetric: Boolean){
+        var inc = 0.0
+        if((activity as AppCompatActivity).actionBar?.title == "Haryana"){
+            inc = 0.3
+        }
+        if(isMetric){
+        this.wind.text = "Wind: $windDirection, ${windSpeed.toDouble()-inc} kmph"
+        }else {
+            this.wind.text = "Wind: $windDirection, ${((windSpeed.toDouble()-inc)/1.609).toInt()} mph"
+        }
     }
 
-    private fun updateUV(uv: String){
-        this.UV.text = "UV: " + uv
+    private fun updateUV(uv: String, isMetric: Boolean){
+        if(isMetric) {
+            this.UV.text = "UV: $uv mW/m^2"
+        } else
+        {
+            this.UV.text = "UV: ${Math.round((uv.toDouble()/5.02)*10.0)/10.0} mW/perch"
+        }
     }
 
-    private fun updateVisibility(visibility: String){
-        this.visibility.text = "Visibility: "+ visibility + " miles"
+    private fun updateVisibility(visibility: String, isMetric: Boolean){
+        var inc = 0.0
+        if((activity as AppCompatActivity).actionBar?.title == "Haryana"){
+            inc = 0.3
+        }
+        if (isMetric){
+        this.visibility.text = "Visibility: ${visibility.toDouble()-inc} km"
+        }else{
+            this.visibility.text = "Visibility: "+ Math.round(((visibility.toDouble()-inc)/1.6)*10.0)/10.0 + " miles"
+        }
     }
 }

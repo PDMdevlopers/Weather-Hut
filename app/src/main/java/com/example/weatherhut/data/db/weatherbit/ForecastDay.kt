@@ -69,7 +69,7 @@ data class ForecastDay(
     @SerializedName("wind_cdir_full")
     val windCdirFull: String,
     @SerializedName("wind_dir")
-    val windDir: Int,
+    val windDir: String,
     @SerializedName("wind_gust_spd")
     val windGustSpd: Double,
     @SerializedName("wind_spd")

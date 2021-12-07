@@ -1,9 +1,7 @@
 package com.example.weatherhut.ui.base
 
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
+import android.app.Application
+import androidx.lifecycle.*
 import com.example.weatherhut.data.provider.UnitProvider
 import com.example.weatherhut.data.repository.WeatherHutRepository
 import com.example.weatherhut.internal.UnitSystem

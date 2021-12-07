@@ -16,6 +16,8 @@ import androidx.navigation.Navigation
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.weatherhut.R
+import com.example.weatherhut.data.provider.UnitProvider
+import com.example.weatherhut.data.provider.UnitProviderImpl
 import com.example.weatherhut.data.unitlocalised.future.SimpleUnitSpecifiedFutureEntry
 import org.threeten.bp.format.DateTimeFormatter
 import org.threeten.bp.format.FormatStyle
@@ -24,7 +26,7 @@ import org.threeten.bp.format.FormatStyle
 class FutureListItemAdapter(
     var context: Context
 ) : RecyclerView.Adapter<FutureListItemAdapter.FutureListViewHolder>() {
-
+    val unitProvider = UnitProviderImpl(context)
     var futureList = ArrayList<SimpleUnitSpecifiedFutureEntry>()
 
     class FutureListViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -43,10 +45,9 @@ class FutureListItemAdapter(
         return FutureListViewHolder(view)
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
     override fun onBindViewHolder(holder: FutureListViewHolder, position: Int) {
         val list = futureList
-        var navController: NavController? = null
+        var navController: NavController
 
         holder.apply {
 
@@ -60,7 +61,7 @@ class FutureListItemAdapter(
 
                     val action =
                         FutureWeatherFragmentDirections.actionFutureWeatherFragmentToDetailWeatherFragment(
-                            position
+                            position+1
                         )
 
                     navController = Navigation.findNavController(itemView)
@@ -71,13 +72,15 @@ class FutureListItemAdapter(
             }
 
         }
-
-        holder.temperature.text = list[position].temp.toString()
+        if(unitProvider.getUnitSystem().name.equals("METRIC")){
+            holder.temperature.text = "${list[position].temp}°C"
+        } else{
+            holder.temperature.text = "${Math.round((list[position].temp*9/5 + 32) * 10.0) / 10.0} °F"
+        }
         holder.weatherDescription.text = list[position].weather.description
         holder.date.text =
             list[position].datetime.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM))
                 .toString()
-        holder.temperature.text = list[position].temp.toString()
         Glide.with(context)
             .load("https://www.weatherbit.io/static/img/icons/${list[position].weather.icon}.png")
             .into(holder.weatherIcon)
@@ -88,8 +91,8 @@ class FutureListItemAdapter(
     }
 
     fun setList(list: List<SimpleUnitSpecifiedFutureEntry>) {
-        this.futureList = ArrayList(list)
         notifyDataSetChanged()
+        this.futureList = ArrayList(list.subList(1, list.size))
     }
 
 }

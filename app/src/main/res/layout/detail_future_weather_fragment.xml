@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#E8E8E8"
+    android:background="@drawable/dawn"
     android:fillViewport="true"
     android:orientation="vertical"
     tools:context=".ui.weather.future.detail.DetailWeatherFragment">
@@ -20,7 +20,7 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 android:contentDescription="Loading"
-                android:backgroundTint="@color/black"
+                android:backgroundTint="@color/white"
                 app:showAnimationBehavior="inward"
                 app:indicatorColor="@color/teal_200"
                 app:layout_constraintStart_toStartOf="parent"
@@ -38,14 +38,29 @@
             android:id="@+id/txt_description_detail"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_margin="8dp"
+            android:layout_marginBottom="8dp"
             android:text="Discription"
             android:textAppearance="@style/TextAppearance.MaterialComponents.Headline4"
-            android:textColor="@color/black"
+            android:textColor="@color/white"
             app:layout_constraintBottom_toTopOf="@id/Temperature_detail"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/txt_date_detail"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="30dp"
+            android:text="date"
+            android:textSize="20sp"
+            android:textAppearance="@style/TextAppearance.MaterialComponents.Headline5"
+            android:textColor="@color/white"
+            app:layout_constraintBottom_toTopOf="@id/Temperature_detail"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/txt_description_detail" />
 
 
         <TextView
@@ -53,10 +68,12 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
-            android:text="23 C"
+            android:text="23°C"
+            android:fontFamily="sans-serif-condensed"
             android:textAppearance="@style/TextAppearance.MaterialComponents.Headline2"
-            android:textColor="@color/black"
-            android:textSize="75sp"
+            android:textColor="@color/white"
+            android:textSize="55sp"
+            app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="@id/guideline"
             app:layout_constraintStart_toStartOf="parent"
@@ -68,9 +85,10 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
+            android:textSize="15sp"
             android:text="Feels like 24 C"
             android:textAppearance="@style/TextAppearance.MaterialComponents.Headline6"
-            android:textColor="@color/black"
+            android:textColor="@color/white"
             app:layout_constraintEnd_toEndOf="@id/guideline"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/Temperature_detail" />
@@ -103,14 +121,13 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
-            android:layout_marginStart="16dp"
             android:text="Max Temperature"
             android:textAppearance="@style/TextAppearance.MaterialComponents.Headline5"
-            android:textColor="@color/black"
+            android:textColor="@color/white"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="@id/Temperature_detail"
             app:layout_constraintTop_toBottomOf="@id/Temperature_detail"
-            app:layout_constraintVertical_bias="0.160" />
+            app:layout_constraintVertical_bias="0.120" />
 
         <TextView
             android:id="@+id/text_min_temperature"
@@ -120,11 +137,11 @@
             android:layout_marginStart="16dp"
             android:text="Min Temperature"
             android:textAppearance="@style/TextAppearance.MaterialComponents.Headline5"
-            android:textColor="@color/black"
+            android:textColor="@color/white"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="@id/Temperature_detail"
             app:layout_constraintTop_toBottomOf="@id/Temperature_detail"
-            app:layout_constraintVertical_bias="0.260" />
+            app:layout_constraintVertical_bias="0.200" />
 
         <TextView
             android:id="@+id/txt_precipitation_detail"
@@ -134,11 +151,11 @@
             android:layout_marginStart="16dp"
             android:text="Precipitation"
             android:textAppearance="@style/TextAppearance.MaterialComponents.Headline5"
-            android:textColor="@color/black"
+            android:textColor="@color/white"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="@id/Temperature_detail"
             app:layout_constraintTop_toBottomOf="@id/Temperature_detail"
-            app:layout_constraintVertical_bias="0.360" />
+            app:layout_constraintVertical_bias="0.300" />
 
         <TextView
             android:id="@+id/txt_visibility_detail"
@@ -148,11 +165,11 @@
             android:layout_marginStart="16dp"
             android:text="Visibility"
             android:textAppearance="@style/TextAppearance.MaterialComponents.Headline5"
-            android:textColor="@color/black"
+            android:textColor="@color/white"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="@id/Temperature_detail"
             app:layout_constraintTop_toBottomOf="@id/Temperature_detail"
-            app:layout_constraintVertical_bias="0.460" />
+            app:layout_constraintVertical_bias="0.400" />
 
         <TextView
             android:id="@+id/txt_wind_detail"
@@ -162,11 +179,11 @@
             android:layout_marginStart="16dp"
             android:text="Wind"
             android:textAppearance="@style/TextAppearance.MaterialComponents.Headline5"
-            android:textColor="@color/black"
+            android:textColor="@color/white"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="@id/Temperature_detail"
             app:layout_constraintTop_toBottomOf="@id/Temperature_detail"
-            app:layout_constraintVertical_bias="0.560" />
+            app:layout_constraintVertical_bias="0.500" />
 
         <TextView
             android:id="@+id/txt_UV_detail"
@@ -176,11 +193,11 @@
             android:layout_marginStart="16dp"
             android:text="UV"
             android:textAppearance="@style/TextAppearance.MaterialComponents.Headline5"
-            android:textColor="@color/black"
+            android:textColor="@color/white"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="@id/Temperature_detail"
             app:layout_constraintTop_toBottomOf="@id/Temperature_detail"
-            app:layout_constraintVertical_bias="0.660" />
+            app:layout_constraintVertical_bias="0.600" />
 
         <TextView
             android:id="@+id/txt_humidity_detail"
@@ -189,11 +206,11 @@
             android:layout_margin="8dp"
             android:layout_marginStart="16dp"
             android:textAppearance="@style/TextAppearance.MaterialComponents.Headline5"
-            android:textColor="@color/black"
+            android:textColor="@color/white"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="@id/Temperature_detail"
             app:layout_constraintTop_toBottomOf="@id/Temperature_detail"
-            app:layout_constraintVertical_bias="0.760" />
+            app:layout_constraintVertical_bias="0.700" />
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>
