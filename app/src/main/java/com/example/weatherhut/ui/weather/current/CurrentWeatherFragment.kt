@@ -207,7 +207,7 @@ class CurrentWeatherFragment : ScopedFragment(), KodeinAware {
         if(isLocationOn){
             inc = 0.3
         }
-
+//
         if (preferredUnit == "IMPERIAL") {
             this.temperature.text = "${Math.round((temperature.toDouble()-inc)*10.0)/10.0} °F"
             this.feelLikeTemperature.text = "${Math.round((feelsLikeTemperature.toDouble()+inc)*10.0)/10.0} °F"
